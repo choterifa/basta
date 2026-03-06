@@ -86,6 +86,7 @@ usort($puntos_por_jugador, function ($a, $b) {
             padding: 20px;
             text-align: center;
         }
+
         h1 {
             color: #ffc800;
             text-transform: uppercase;
@@ -94,6 +95,7 @@ usort($puntos_por_jugador, function ($a, $b) {
             text-shadow: 2px 2px 0 #e6b400;
             margin-bottom: 10px;
         }
+
         .winner {
             background: #ffc800;
             color: white;
@@ -118,7 +120,7 @@ usort($puntos_por_jugador, function ($a, $b) {
             overflow: hidden;
             box-shadow: 0 10px 0 #e5e5e5;
         }
-        
+
         th {
             background-color: #1cb0f6;
             color: white;
@@ -128,18 +130,18 @@ usort($puntos_por_jugador, function ($a, $b) {
             font-size: 0.8rem;
             letter-spacing: 1px;
         }
-        
+
         td {
             padding: 12px;
             border-bottom: 2px solid #f7f7f7;
             color: #3c3c3c;
             font-weight: 700;
         }
-        
+
         tr:last-child td {
             border-bottom: none;
         }
-        
+
         tr:hover td {
             background-color: #f0faff;
         }
@@ -165,12 +167,24 @@ usort($puntos_por_jugador, function ($a, $b) {
             box-shadow: 0 5px 0 #46a302;
             transition: transform 0.1s;
         }
-        .btn:hover { transform: scale(1.05); }
-        .btn:active { transform: translateY(5px); box-shadow: none; }
+
+        .btn:hover {
+            transform: scale(1.05);
+        }
+
+        .btn:active {
+            transform: translateY(5px);
+            box-shadow: none;
+        }
 
         @keyframes bounce {
-            from { transform: translateY(0); }
-            to { transform: translateY(-10px); }
+            from {
+                transform: translateY(0);
+            }
+
+            to {
+                transform: translateY(-10px);
+            }
         }
     </style>
 </head>

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Juego Basta</title>
     <!-- Add Google Font -->
@@ -8,7 +9,8 @@
         /* Global Styles */
         body {
             font-family: 'Nunito', sans-serif;
-            background-color: #f7f7f7; /* Light gray background */
+            background-color: #f7f7f7;
+            /* Light gray background */
             color: #3c3c3c;
             display: flex;
             justify-content: center;
@@ -17,14 +19,17 @@
             margin: 0;
             padding: 20px;
         }
+
         h1 {
-            color: #58cc02; /* Duolingo Green */
+            color: #58cc02;
+            /* Duolingo Green */
             font-weight: 900;
             font-size: 3rem;
             text-align: center;
             margin-bottom: 20px;
             text-shadow: 2px 2px 0px #46a302;
         }
+
         h3 {
             color: #afafaf;
             text-transform: uppercase;
@@ -53,7 +58,7 @@
             gap: 15px;
             margin-bottom: 30px;
         }
-        
+
         label {
             font-weight: 700;
             text-align: left;
@@ -72,6 +77,7 @@
             outline: none;
             background: #f7f7f7;
         }
+
         input:focus {
             border-color: #58cc02;
             background: #fff;
@@ -92,10 +98,12 @@
             text-transform: uppercase;
             margin-top: 10px;
         }
+
         button:active {
             transform: translateY(4px);
             box-shadow: 0 0 0 #46a302;
         }
+
         button:hover {
             filter: brightness(1.1);
         }
@@ -106,6 +114,7 @@
             margin: 30px 0;
             position: relative;
         }
+
         .divider::after {
             content: "O";
             position: absolute;
@@ -124,6 +133,7 @@
             padding: 0;
             text-align: left;
         }
+
         li {
             background: #fff;
             border: 2px solid #e5e5e5;
@@ -136,17 +146,18 @@
             justify-content: space-between;
             align-items: center;
         }
-        li span {
-            color: #1cb0f6; /* Duo Blue */
-        }
 
+        li span {
+            color: #1cb0f6;
+            /* Duo Blue */
+        }
     </style>
 </head>
 
 <body>
     <div class="container">
         <h1>BASTA</h1>
-        
+
         <!-- Create Game -->
         <form action="crear_partida.php" method="post">
             <label>Tu Nombre:</label>
@@ -170,8 +181,8 @@
             <?php
             include("conectar.php");
             $res = mysqli_query($conn, "SELECT * FROM partidas WHERE estado='en curso' ORDER BY id_partida DESC LIMIT 5");
-            if(mysqli_num_rows($res) > 0) {
-                while($row = mysqli_fetch_assoc($res)){
+            if (mysqli_num_rows($res) > 0) {
+                while ($row = mysqli_fetch_assoc($res)) {
                     echo "<li><span>ID: " . $row['id_partida'] . "</span> Letra: " . ($row['letra_actual'] ? $row['letra_actual'] : '⏳') . "</li>";
                 }
             } else {
@@ -181,6 +192,7 @@
         </ul>
     </div>
 </body>
+
 </html>
 
 </body>

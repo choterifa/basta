@@ -33,6 +33,7 @@ if ($tiempo_restante < 0) $tiempo_restante = 0;
 ?>
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Jugando Basta - Letra <?php echo $letra; ?></title>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
@@ -41,84 +42,112 @@ if ($tiempo_restante < 0) $tiempo_restante = 0;
             font-family: 'Nunito', sans-serif;
             background-color: #f7f7f7;
             margin: 0;
-            padding: 20px;
+            padding: 0;
             display: flex;
             justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
         }
+
         .container {
             background: white;
-            padding: 30px;
+            padding: 20px;
             border-radius: 20px;
             box-shadow: 0 10px 0 #e5e5e5;
-            width: 100%;
-            max-width: 600px;
+            width: 95%;
+            max-width: 800px;
+            max-height: 95vh;
+            display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
         }
+
         h1 {
             color: #3c3c3c;
             text-align: center;
-            margin-top: 0;
+            margin: 0 0 5px 0;
             font-weight: 900;
+            font-size: 1.5rem;
         }
+
         h2 {
             text-align: center;
             color: #777;
-            font-size: 1.2rem;
-            margin-top: -10px;
+            font-size: 1rem;
+            margin: 0 0 10px 0;
         }
+
         #letra-display {
             display: inline-block;
             background: #1cb0f6;
             color: white;
-            padding: 5px 20px;
-            border-radius: 15px;
-            font-size: 2.5rem;
+            padding: 2px 15px;
+            border-radius: 12px;
+            font-size: 1.8rem;
             font-weight: 900;
-            box-shadow: 0 6px 0 #1899d6;
-            transform: rotate(-3deg) translateY(-5px);
-            margin-left: 10px;
+            box-shadow: 0 4px 0 #1899d6;
+            transform: rotate(-3deg) translateY(-3px);
+            margin-left: 5px;
         }
+
         .timer {
-            position: fixed;
-            top: 20px;
-            right: 20px;
+            position: absolute;
+            top: 15px;
+            right: 15px;
             background: #ff4b4b;
             color: white;
-            padding: 10px 20px;
-            border-radius: 50px;
+            padding: 8px 15px;
+            border-radius: 30px;
             font-weight: 900;
-            font-size: 1.5rem;
-            box-shadow: 0 4px 0 #d43b3b;
+            font-size: 1.2rem;
+            box-shadow: 0 3px 0 #d43b3b;
             z-index: 100;
             animation: pulse 1s infinite;
         }
 
         form {
             display: grid;
+            grid-template-columns: 1fr 1fr;
             gap: 15px;
-            margin-top: 20px;
+            overflow-y: auto;
+            padding: 5px;
+            align-content: start;
         }
-        
+
+        /* Make button span full width */
+        .btn-container {
+            grid-column: 1 / -1;
+            margin-top: 10px;
+        }
+
+        .field-group {
+            display: flex;
+            flex-direction: column;
+        }
+
         label {
             font-weight: 800;
             color: #777;
-            margin-bottom: 5px;
+            margin-bottom: 3px;
             text-transform: uppercase;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             letter-spacing: 0.5px;
         }
 
         input {
-            padding: 12px;
+            padding: 10px;
             border: 2px solid #e5e5e5;
             border-radius: 12px;
-            font-size: 1.1rem;
+            font-size: 1rem;
             font-family: 'Nunito', sans-serif;
             background: #f7f7f7;
             outline: none;
             transition: all 0.2s;
             width: 100%;
-            box-sizing: border-box; /* Fix width overflow */
+            box-sizing: border-box;
         }
+
         input:focus {
             border-color: #1cb0f6;
             background: #fff;
@@ -129,26 +158,55 @@ if ($tiempo_restante < 0) $tiempo_restante = 0;
             background-color: #ff4b4b;
             color: white;
             border: none;
-            padding: 20px;
-            font-size: 2rem;
+            padding: 15px;
+            font-size: 1.5rem;
             font-weight: 900;
             border-radius: 16px;
             cursor: pointer;
-            box-shadow: 0 6px 0 #d43b3b;
+            box-shadow: 0 5px 0 #d43b3b;
             text-transform: uppercase;
-            margin-top: 20px;
             width: 100%;
             transition: all 0.1s;
         }
+
         button.btn-basta:active {
-            transform: translateY(6px);
+            transform: translateY(5px);
             box-shadow: none;
         }
 
+        /* Mobile adjustment */
+        @media (max-width: 600px) {
+            form {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+
+            h1 {
+                font-size: 1.2rem;
+            }
+
+            #letra-display {
+                font-size: 1.5rem;
+            }
+
+            .timer {
+                font-size: 1rem;
+                padding: 5px 10px;
+            }
+        }
+
         @keyframes pulse {
-           0% { transform: scale(1); }
-           50% { transform: scale(1.05); }
-           100% { transform: scale(1); }
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+
+            100% {
+                transform: scale(1);
+            }
         }
     </style>
 </head>
@@ -156,41 +214,60 @@ if ($tiempo_restante < 0) $tiempo_restante = 0;
 <body>
 
     <div class="container">
-        <h1>Juego en curso</h1>
-        <h2>Letra: <span id="letra-display"><?php echo $letra; ?></span></h2>
-
-        <div id="timer-display" class="timer"><?php echo $tiempo_restante; ?></div>
+        <!-- Relative container for absolute timer -->
+        <div style="position: relative; width: 100%;">
+            <h1>Juego en curso</h1>
+            <h2>Letra: <span id="letra-display"><?php echo $letra; ?></span></h2>
+            <div id="timer-display" class="timer"><?php echo $tiempo_restante; ?></div>
+        </div>
 
         <form id="game-form" action="enviar.php" method="post">
 
-            <label>Nombre:</label>
-            <input type="text" name="nombre" autocomplete="off">
+            <div class="field-group">
+                <label>Nombre:</label>
+                <input type="text" name="nombre" autocomplete="off">
+            </div>
 
-            <label>Apellido:</label>
-            <input type="text" name="apellido" autocomplete="off">
+            <div class="field-group">
+                <label>Apellido:</label>
+                <input type="text" name="apellido" autocomplete="off">
+            </div>
 
-            <label>Flor o Fruto:</label>
-            <input type="text" name="flor_fruto" autocomplete="off">
+            <div class="field-group">
+                <label>Flor o Fruto:</label>
+                <input type="text" name="flor_fruto" autocomplete="off">
+            </div>
 
-            <label>Animal:</label>
-            <input type="text" name="animal" autocomplete="off">
+            <div class="field-group">
+                <label>Animal:</label>
+                <input type="text" name="animal" autocomplete="off">
+            </div>
 
-            <label>Color:</label>
-            <input type="text" name="color" autocomplete="off">
+            <div class="field-group">
+                <label>Color:</label>
+                <input type="text" name="color" autocomplete="off">
+            </div>
 
-            <label>Cosa:</label>
-            <input type="text" name="cosa" autocomplete="off">
+            <div class="field-group">
+                <label>Cosa:</label>
+                <input type="text" name="cosa" autocomplete="off">
+            </div>
 
-            <label>País:</label>
-            <input type="text" name="pais" autocomplete="off">
+            <div class="field-group">
+                <label>País:</label>
+                <input type="text" name="pais" autocomplete="off">
+            </div>
 
-            <label>Verbo:</label>
-            <input type="text" name="verbo" autocomplete="off">
+            <div class="field-group">
+                <label>Verbo:</label>
+                <input type="text" name="verbo" autocomplete="off">
+            </div>
 
-            <br>
-            <button type="button" class="btn-basta" onclick="stopGame()">
-                ¡BASTA!
-            </button>
+            <div class="btn-container">
+                <button type="button" class="btn-basta" onclick="stopGame()">
+                    ¡BASTA!
+                </button>
+            </div>
 
         </form>
     </div>
