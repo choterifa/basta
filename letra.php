@@ -127,7 +127,7 @@ if ($tiempo_restante < 0) $tiempo_restante = 0;
         }
 
         label {
-            font-weight: 800;
+            font-weight: 800;p
             color: #777;
             margin-bottom: 3px;
             text-transform: uppercase;
