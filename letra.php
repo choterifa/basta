@@ -148,6 +148,27 @@ if ($tiempo_restante < 0) $tiempo_restante = 0;
             box-sizing: border-box;
         }
 
+        input.invalid {
+            border-color: #ff4b4b;
+            background: #fff0f0;
+        }
+
+        input.valid {
+            border-color: #58cc02;
+            background: #f0fff0;
+        }
+
+        .error-message {
+            color: #ff4b4b;
+            font-size: 0.75rem;
+            margin-top: 3px;
+            display: none;
+        }
+
+        .error-message.visible {
+            display: block;
+        }
+
         input:focus {
             border-color: #1cb0f6;
             background: #fff;
@@ -225,42 +246,50 @@ if ($tiempo_restante < 0) $tiempo_restante = 0;
 
             <div class="field-group">
                 <label>Nombre:</label>
-                <input type="text" name="nombre" autocomplete="off">
+                <input type="text" name="nombre" autocomplete="off" data-validate="true">
+                <span class="error-message">Debe comenzar con la letra <?php echo $letra; ?></span>
             </div>
 
             <div class="field-group">
                 <label>Apellido:</label>
-                <input type="text" name="apellido" autocomplete="off">
+                <input type="text" name="apellido" autocomplete="off" data-validate="true">
+                <span class="error-message">Debe comenzar con la letra <?php echo $letra; ?></span>
             </div>
 
             <div class="field-group">
                 <label>Flor o Fruto:</label>
-                <input type="text" name="flor_fruto" autocomplete="off">
+                <input type="text" name="flor_fruto" autocomplete="off" data-validate="true">
+                <span class="error-message">Debe comenzar con la letra <?php echo $letra; ?></span>
             </div>
 
             <div class="field-group">
                 <label>Animal:</label>
-                <input type="text" name="animal" autocomplete="off">
+                <input type="text" name="animal" autocomplete="off" data-validate="true">
+                <span class="error-message">Debe comenzar con la letra <?php echo $letra; ?></span>
             </div>
 
             <div class="field-group">
                 <label>Color:</label>
-                <input type="text" name="color" autocomplete="off">
+                <input type="text" name="color" autocomplete="off" data-validate="true">
+                <span class="error-message">Debe comenzar con la letra <?php echo $letra; ?></span>
             </div>
 
             <div class="field-group">
                 <label>Cosa:</label>
-                <input type="text" name="cosa" autocomplete="off">
+                <input type="text" name="cosa" autocomplete="off" data-validate="true">
+                <span class="error-message">Debe comenzar con la letra <?php echo $letra; ?></span>
             </div>
 
             <div class="field-group">
                 <label>País:</label>
-                <input type="text" name="pais" autocomplete="off">
+                <input type="text" name="pais" autocomplete="off" data-validate="true">
+                <span class="error-message">Debe comenzar con la letra <?php echo $letra; ?></span>
             </div>
 
             <div class="field-group">
                 <label>Verbo:</label>
-                <input type="text" name="verbo" autocomplete="off">
+                <input type="text" name="verbo" autocomplete="off" data-validate="true">
+                <span class="error-message">Debe comenzar con la letra <?php echo $letra; ?></span>
             </div>
 
             <div class="btn-container">
@@ -273,10 +302,68 @@ if ($tiempo_restante < 0) $tiempo_restante = 0;
     </div>
 
     <script>
+        const letraActual = '<?php echo $letra; ?>';
         let timeLeft = <?php echo $tiempo_restante; ?>;
         const timerDisplay = document.getElementById('timer-display');
         const form = document.getElementById('game-form');
         let gameEnded = false;
+
+        // Validación de campos
+        function validarCampo(input) {
+            const valor = input.value.trim();
+            const errorSpan = input.parentElement.querySelector('.error-message');
+            
+            if (valor === '') {
+                input.classList.remove('valid', 'invalid');
+                errorSpan.classList.remove('visible');
+                return true; // Campo vacío es válido (no se responde)
+            }
+            
+            const primeraLetra = valor.charAt(0).toUpperCase();
+            const esValido = primeraLetra === letraActual;
+            
+            if (esValido) {
+                input.classList.remove('invalid');
+                input.classList.add('valid');
+                errorSpan.classList.remove('visible');
+            } else {
+                input.classList.remove('valid');
+                input.classList.add('invalid');
+                errorSpan.classList.add('visible');
+            }
+            
+            return esValido;
+        }
+
+        // Agregar listeners a todos los campos
+        document.querySelectorAll('input[data-validate="true"]').forEach(input => {
+            input.addEventListener('input', () => validarCampo(input));
+            input.addEventListener('blur', () => validarCampo(input));
+        });
+
+        // Validar formulario antes de enviar
+        form.addEventListener('submit', function(e) {
+            let hayInvalidos = false;
+            let camposInvalidos = [];
+            
+            document.querySelectorAll('input[data-validate="true"]').forEach(input => {
+                const valor = input.value.trim();
+                if (valor !== '') {
+                    const primeraLetra = valor.charAt(0).toUpperCase();
+                    if (primeraLetra !== letraActual) {
+                        hayInvalidos = true;
+                        camposInvalidos.push(input.parentElement.querySelector('label').textContent.replace(':', ''));
+                        input.classList.add('invalid');
+                    }
+                }
+            });
+            
+            if (hayInvalidos) {
+                e.preventDefault();
+                alert('Las siguientes palabras no comienzan con la letra ' + letraActual + ':\n' + camposInvalidos.join('\n'));
+                return false;
+            }
+        });
 
         // Initial display
         timerDisplay.textContent = timeLeft;
