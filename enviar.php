@@ -1,6 +1,7 @@
 <?php
 session_start();
 include("conectar.php");
+include("round_sync.php");
 
 if (!isset($_SESSION['id_partida']) || !isset($_SESSION['id_jugador'])) {
     header("Location: index.php");
@@ -15,8 +16,8 @@ $query = mysqli_query($conn, "SELECT letra_actual FROM partidas WHERE id_partida
 $partida = mysqli_fetch_assoc($query);
 $letra = $partida['letra_actual'];
 
-// Marcar partida como finalizada (si soy el primero en enviar o se acabó el tiempo)
-mysqli_query($conn, "UPDATE partidas SET estado='finalizada' WHERE id_partida=$id_partida");
+// Marcar partida como finalizada y mantener el mismo cierre compartido
+ensureRoundDeadlineMs($conn, $id_partida);
 
 // Categorias
 $categorias = ["nombre", "apellido", "flor_fruto", "animal", "color", "cosa", "pais", "verbo"];

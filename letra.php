@@ -106,6 +106,22 @@ if ($tiempo_restante < 0) $tiempo_restante = 0;
             animation: pulse 1s infinite;
         }
 
+        .round-status {
+            display: none;
+            margin: 0 auto 14px;
+            padding: 10px 14px;
+            max-width: 460px;
+            border-radius: 14px;
+            background: #fff7d6;
+            color: #8a6a00;
+            font-weight: 800;
+            text-align: center;
+        }
+
+        .round-status.visible {
+            display: block;
+        }
+
         form {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -241,6 +257,7 @@ if ($tiempo_restante < 0) $tiempo_restante = 0;
             <h2>Letra: <span id="letra-display"><?php echo $letra; ?></span></h2>
             <div id="timer-display" class="timer"><?php echo $tiempo_restante; ?></div>
         </div>
+        <div id="round-status" class="round-status"></div>
 
         <form id="game-form" action="enviar.php" method="post">
 
@@ -306,7 +323,56 @@ if ($tiempo_restante < 0) $tiempo_restante = 0;
         let timeLeft = <?php echo $tiempo_restante; ?>;
         const timerDisplay = document.getElementById('timer-display');
         const form = document.getElementById('game-form');
+        const roundStatus = document.getElementById('round-status');
         let gameEnded = false;
+        let submitTimeout = null;
+
+        function mostrarEstadoRonda(message) {
+            if (!message) return;
+            roundStatus.textContent = message;
+            roundStatus.classList.add('visible');
+        }
+
+        function programarEnvio(deadlineMs, message) {
+            if (gameEnded) return;
+            gameEnded = true;
+            clearInterval(timerInterval);
+            clearInterval(pollingInterval);
+            if (submitTimeout) clearTimeout(submitTimeout);
+            mostrarEstadoRonda(message || 'La ronda termino. Enviando respuestas...');
+
+            const delay = Math.max(0, deadlineMs - Date.now());
+            submitTimeout = setTimeout(() => {
+                form.submit();
+            }, delay);
+        }
+
+        function finalizarRonda(message) {
+            if (gameEnded) return;
+
+            fetch('finalizar_ronda.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+                },
+                body: 'finalizar=1'
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data && data.deadline_ms) {
+                        programarEnvio(data.deadline_ms, message);
+                        return;
+                    }
+                    throw new Error('No deadline received');
+                })
+                .catch(() => {
+                    gameEnded = true;
+                    clearInterval(timerInterval);
+                    clearInterval(pollingInterval);
+                    mostrarEstadoRonda(message || 'La ronda termino. Enviando respuestas...');
+                    form.submit();
+                });
+        }
 
         // Validación de campos
         function validarCampo(input) {
@@ -360,15 +426,6 @@ if ($tiempo_restante < 0) $tiempo_restante = 0;
         // Initial display
         timerDisplay.textContent = timeLeft;
 
-        function endGame(message) {
-            if (gameEnded) return;
-            gameEnded = true;
-            clearInterval(timerInterval);
-            clearInterval(pollingInterval);
-            if (message) alert(message);
-            form.submit();
-        }
-
         // Temporizador
         const timerInterval = setInterval(() => {
             if (gameEnded) return;
@@ -377,7 +434,7 @@ if ($tiempo_restante < 0) $tiempo_restante = 0;
                 timerDisplay.textContent = timeLeft;
             }
             if (timeLeft <= 0) {
-                endGame("¡Tiempo fuera!");
+                finalizarRonda("Tiempo fuera. Cerrando ronda...");
             }
         }, 1000);
 
@@ -385,7 +442,7 @@ if ($tiempo_restante < 0) $tiempo_restante = 0;
         function stopGame() {
             if (gameEnded) return;
             if (confirm("¿Estás seguro de detener el juego?")) {
-                endGame();
+                finalizarRonda("Ronda terminada. Enviando respuestas...");
             }
         }
 
@@ -395,12 +452,12 @@ if ($tiempo_restante < 0) $tiempo_restante = 0;
             fetch('check_status.php')
                 .then(response => response.json())
                 .then(data => {
-                    if (data.estado === 'finalizada') {
-                        endGame("¡Alguien presionó BASTA! Enviando respuestas...");
+                    if (data.estado === 'finalizada' && data.deadline_ms) {
+                        programarEnvio(data.deadline_ms, "Alguien presiono BASTA. Enviando respuestas...");
                     }
                 })
                 .catch(err => console.error("Error polling status:", err));
-        }, 2000); // Chequear cada 2 segundos
+        }, 250); // Chequear rapido para cerrar la ronda en todos casi al mismo tiempo
     </script>
 
 </body>

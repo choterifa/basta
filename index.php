@@ -26,7 +26,8 @@
             font-weight: 900;
             font-size: 3rem;
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
+            margin-top: 5px;
             text-shadow: 2px 2px 0px #46a302;
         }
 
@@ -43,7 +44,7 @@
         /* Container */
         .container {
             background: white;
-            padding: 40px;
+            padding: 40px 45px;
             border-radius: 20px;
             box-shadow: 0 10px 0 #e5e5e5;
             width: 100%;

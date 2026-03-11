@@ -8,6 +8,18 @@ if (!isset($_SESSION['id_partida'])) {
 }
 
 $id_partida = $_SESSION['id_partida'];
+$categorias_lista = ["nombre", "apellido", "flor_fruto", "animal", "color", "cosa", "pais", "verbo"];
+
+$jugadores = [];
+$query_jugadores = "SELECT id_jugador, nombre FROM jugadores WHERE partida_id = $id_partida ORDER BY id_jugador ASC";
+$result_jugadores = mysqli_query($conn, $query_jugadores);
+
+while ($row = mysqli_fetch_assoc($result_jugadores)) {
+    $jugadores[(int) $row['id_jugador']] = [
+        'id' => (int) $row['id_jugador'],
+        'nombre' => $row['nombre'],
+    ];
+}
 
 // 1. Obtener todas las respuestas de la partida
 $query = "SELECT r.id_respuesta, r.categoria, r.palabra, r.puntos, r.jugador_id, j.nombre 
@@ -38,7 +50,10 @@ foreach ($respuestas as $resp) {
 // 3. Asignar puntos
 $puntos_por_jugador = []; // [jugador_id] => ['nombre'=>, 'total'=>, 'id'=>]
 $detalles_jugador = []; // [jugador_id][categoria] => [palabra, puntos]
-$categorias_lista = ["nombre", "apellido", "flor_fruto", "animal", "color", "cosa", "pais", "verbo"];
+
+foreach ($jugadores as $id_jugador => $jugador) {
+    $puntos_por_jugador[$id_jugador] = ['nombre' => $jugador['nombre'], 'total' => 0, 'id' => $id_jugador];
+}
 
 foreach ($respuestas as $resp) {
     $puntos = 0;
@@ -115,13 +130,12 @@ usort($puntos_por_jugador, function ($a, $b) {
             justify-content: center;
             gap: 10px;
             margin-bottom: 28px;
-            box-shadow: 0 6px 0 #e6b400;
+            box-shadow: 0 4px 0 #e6b400;
         }
 
         .table-shell {
             background: white;
             border-radius: 22px;
-            box-shadow: 0 10px 0 #e5e5e5;
             overflow: hidden;
         }
 
@@ -135,6 +149,7 @@ usort($puntos_por_jugador, function ($a, $b) {
             width: 100%;
             min-width: 980px;
             background: white;
+
         }
 
         th {
@@ -216,7 +231,7 @@ usort($puntos_por_jugador, function ($a, $b) {
             font-weight: 800;
             border-radius: 15px;
             text-decoration: none;
-            box-shadow: 0 5px 0 #46a302;
+            box-shadow: 0 3px 0 #46a302;
             transition: transform 0.1s;
         }
 
