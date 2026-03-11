@@ -83,6 +83,13 @@
             background: #fff;
         }
 
+        .input-hint {
+            margin-top: -8px;
+            font-size: 0.8rem;
+            color: #999;
+            text-align: left;
+        }
+
         /* Buttons */
         button {
             background-color: #58cc02;
@@ -161,7 +168,8 @@
         <!-- Create Game -->
         <form action="crear_partida.php" method="post">
             <label>Tu Nombre:</label>
-            <input type="text" name="nombre" placeholder="Ej. Juan Pérez" required>
+            <input type="text" name="nombre" placeholder="Ej. Juan Pérez" required data-name-only="true" autocomplete="off">
+            <div class="input-hint">Solo letras, espacios, guion y apostrofe.</div>
             <button type="submit">Crear Partida</button>
         </form>
 
@@ -170,14 +178,15 @@
         <!-- Join Game -->
         <form action="unirse.php" method="post">
             <label>Tu Nombre:</label>
-            <input type="text" name="nombre" placeholder="Ej. Ana García" required>
+            <input type="text" name="nombre" placeholder="Ej. Ana García" required data-name-only="true" autocomplete="off">
+            <div class="input-hint">Solo letras, espacios, guion y apostrofe.</div>
             <label>ID de Partida:</label>
             <input type="number" name="partida" placeholder="Ej. 12" required>
             <button type="submit" style="background-color: #1cb0f6; box-shadow: 0 4px 0 #1899d6;">Unirse</button>
         </form>
 
         <h3>Partidas disponibles:</h3>
-        <ul>
+        <ul id="lista-partidas">
             <?php
             include("conectar.php");
             $res = mysqli_query($conn, "SELECT * FROM partidas WHERE estado='en curso' ORDER BY id_partida DESC LIMIT 5");
@@ -191,10 +200,45 @@
             ?>
         </ul>
     </div>
+
+    <script>
+        const caracteresNombrePermitidos = /[^A-Za-zÁÉÍÓÚÜÑáéíóúüñ\s'-]/g;
+        const listaPartidas = document.getElementById('lista-partidas');
+
+        function limpiarNombre(valor) {
+            return valor.replace(caracteresNombrePermitidos, '').replace(/\s{2,}/g, ' ');
+        }
+
+        document.querySelectorAll('input[data-name-only="true"]').forEach((input) => {
+            input.addEventListener('input', () => {
+                const limpio = limpiarNombre(input.value);
+                if (input.value !== limpio) {
+                    input.value = limpio;
+                }
+            });
+        });
+
+        function renderizarPartidas(partidas) {
+            if (!Array.isArray(partidas) || partidas.length === 0) {
+                listaPartidas.innerHTML = "<li style='text-align: center; color: #ccc; border:none;'>No hay partidas activas :(</li>";
+                return;
+            }
+
+            listaPartidas.innerHTML = partidas.map((partida) => {
+                const letra = partida.letra_actual ? partida.letra_actual : '⏳';
+                return `<li><span>ID: ${partida.id_partida}</span> Letra: ${letra}</li>`;
+            }).join('');
+        }
+
+        function cargarPartidas() {
+            fetch('partidas_activas.php', { cache: 'no-store' })
+                .then((response) => response.json())
+                .then((partidas) => renderizarPartidas(partidas))
+                .catch((error) => console.error('Error cargando partidas:', error));
+        }
+
+        cargarPartidas();
+        setInterval(cargarPartidas, 3000);
+    </script>
 </body>
-
-</html>
-
-</body>
-
 </html>

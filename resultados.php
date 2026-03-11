@@ -10,7 +10,7 @@ if (!isset($_SESSION['id_partida'])) {
 $id_partida = $_SESSION['id_partida'];
 
 // 1. Obtener todas las respuestas de la partida
-$query = "SELECT r.id_respuesta, r.categoria, r.palabra, r.jugador_id, j.nombre 
+$query = "SELECT r.id_respuesta, r.categoria, r.palabra, r.puntos, r.jugador_id, j.nombre 
           FROM respuestas r 
           JOIN jugadores j ON r.jugador_id = j.id_jugador 
           WHERE j.partida_id = $id_partida";
@@ -21,10 +21,10 @@ while ($row = mysqli_fetch_assoc($result)) {
     $respuestas[] = $row;
 }
 
-// 2. Calcular frecuencias por categoría y palabra
+// 2. Calcular frecuencias por categoría y palabra solo con respuestas validas
 $frecuencias = []; // [categoria][palabra] => count
 foreach ($respuestas as $resp) {
-    if (empty($resp['palabra'])) continue;
+    if (empty($resp['palabra']) || (int) $resp['puntos'] <= 0) continue;
 
     $cat = $resp['categoria'];
     $pal = $resp['palabra'];
@@ -44,8 +44,9 @@ foreach ($respuestas as $resp) {
     $puntos = 0;
     $cat = $resp['categoria'];
     $pal = $resp['palabra'];
+    $respuesta_valida = (int) $resp['puntos'] > 0;
 
-    if (!empty($pal)) {
+    if (!empty($pal) && $respuesta_valida) {
         $count = $frecuencias[$cat][$pal] ?? 0;
 
         if ($count == 1) $puntos = 100;
@@ -83,7 +84,13 @@ usort($puntos_por_jugador, function ($a, $b) {
             font-family: 'Nunito', sans-serif;
             background-color: #f7f7f7;
             margin: 0;
-            padding: 20px;
+            padding: 24px;
+            color: #3c3c3c;
+        }
+
+        .page {
+            max-width: 1200px;
+            margin: 0 auto;
             text-align: center;
         }
 
@@ -91,72 +98,117 @@ usort($puntos_por_jugador, function ($a, $b) {
             color: #ffc800;
             text-transform: uppercase;
             font-weight: 900;
-            font-size: 2.5rem;
+            font-size: clamp(2rem, 4vw, 3rem);
             text-shadow: 2px 2px 0 #e6b400;
-            margin-bottom: 10px;
+            margin: 0 0 18px;
         }
 
         .winner {
             background: #ffc800;
             color: white;
-            padding: 20px;
+            padding: 18px 24px;
             border-radius: 20px;
-            font-size: 1.8rem;
+            font-size: clamp(1.2rem, 2.2vw, 1.8rem);
             font-weight: 900;
-            display: inline-block;
-            margin-bottom: 30px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 28px;
             box-shadow: 0 6px 0 #e6b400;
-            animation: bounce 1s infinite alternate;
+        }
+
+        .table-shell {
+            background: white;
+            border-radius: 22px;
+            box-shadow: 0 10px 0 #e5e5e5;
+            overflow: hidden;
+        }
+
+        .table-wrap {
+            overflow-x: auto;
         }
 
         table {
-            margin: 0 auto;
             border-collapse: separate;
             border-spacing: 0;
-            width: 95%;
-            max-width: 1000px;
+            width: 100%;
+            min-width: 980px;
             background: white;
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: 0 10px 0 #e5e5e5;
         }
 
         th {
             background-color: #1cb0f6;
             color: white;
-            padding: 15px;
+            padding: 16px 14px;
             font-weight: 800;
             text-transform: uppercase;
-            font-size: 0.8rem;
-            letter-spacing: 1px;
+            font-size: 0.78rem;
+            letter-spacing: 0.08em;
         }
 
         td {
-            padding: 12px;
-            border-bottom: 2px solid #f7f7f7;
+            padding: 16px 14px;
+            border-bottom: 1px solid #edf1f5;
             color: #3c3c3c;
             font-weight: 700;
+            vertical-align: top;
         }
 
         tr:last-child td {
             border-bottom: none;
         }
 
-        tr:hover td {
+        tbody tr:nth-child(even) td {
+            background: #fbfcfe;
+        }
+
+        tbody tr:hover td {
             background-color: #f0faff;
         }
 
-        small {
+        .player-name {
+            font-size: 1.25rem;
+            font-weight: 900;
+            white-space: nowrap;
+        }
+
+        .cell-word {
             display: block;
-            margin-top: 4px;
-            color: #888;
-            font-weight: 600;
-            font-size: 0.8em;
+            min-height: 1.4em;
+            font-size: 0.98rem;
+            word-break: break-word;
+        }
+
+        .cell-word.empty {
+            color: #b7bec8;
+        }
+
+        .cell-points {
+            display: inline-block;
+            margin-top: 8px;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 0.82rem;
+            font-weight: 800;
+            background: #edf7ff;
+            color: #1c7eb8;
+        }
+
+        .cell-points.zero {
+            background: #f1f3f5;
+            color: #7a848f;
+        }
+
+        .total-score {
+            font-size: 1.5rem;
+            font-weight: 900;
+            white-space: nowrap;
         }
 
         .btn {
             display: inline-block;
-            margin-top: 40px;
+            margin-top: 32px;
             background-color: #58cc02;
             color: white;
             padding: 15px 40px;
@@ -177,64 +229,72 @@ usort($puntos_por_jugador, function ($a, $b) {
             box-shadow: none;
         }
 
-        @keyframes bounce {
-            from {
-                transform: translateY(0);
+        @media (max-width: 768px) {
+            body {
+                padding: 16px;
             }
 
-            to {
-                transform: translateY(-10px);
+            .winner {
+                width: calc(100% - 8px);
+                box-sizing: border-box;
             }
         }
     </style>
 </head>
 
 <body>
+    <div class="page">
+        <h1>Resultados de la Ronda</h1>
 
-    <h1>Resultados de la Ronda</h1>
+        <?php if (count($puntos_por_jugador) > 0): ?>
+            <div class="winner">
+                <span>👑</span>
+                <span>Ganador: <?php echo htmlspecialchars($puntos_por_jugador[0]['nombre']); ?> (<?php echo $puntos_por_jugador[0]['total']; ?> pts)</span>
+            </div>
+        <?php endif; ?>
 
-    <?php if (count($puntos_por_jugador) > 0): ?>
-        <div class="winner">
-            👑 Ganador: <?php echo $puntos_por_jugador[0]['nombre']; ?> (<?php echo $puntos_por_jugador[0]['total']; ?> pts)
+        <div class="table-shell">
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Jugador</th>
+                            <?php foreach ($categorias_lista as $cat_header): ?>
+                                <th><?php echo htmlspecialchars(ucfirst(str_replace('_', ' ', $cat_header))); ?></th>
+                            <?php endforeach; ?>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($puntos_por_jugador as $player):
+                            $pid = $player['id'];
+                            $cats = $detalles_jugador[$pid] ?? [];
+                        ?>
+                            <tr>
+                                <td><span class="player-name"><?php echo htmlspecialchars($player['nombre']); ?></span></td>
+                                <?php foreach ($categorias_lista as $cat):
+                                    $data = $cats[$cat] ?? ['palabra' => '', 'puntos' => 0];
+                                    $palabra = trim($data['palabra']);
+                                    $palabra_clase = $palabra === '' ? 'cell-word empty' : 'cell-word';
+                                    $puntos_clase = (int) $data['puntos'] === 0 ? 'cell-points zero' : 'cell-points';
+                                ?>
+                                    <td>
+                                        <span class="<?php echo $palabra_clase; ?>">
+                                            <?php echo $palabra === '' ? 'Sin respuesta' : htmlspecialchars($palabra); ?>
+                                        </span>
+                                        <span class="<?php echo $puntos_clase; ?>"><?php echo (int) $data['puntos']; ?> pts</span>
+                                    </td>
+                                <?php endforeach; ?>
+                                <td><span class="total-score"><?php echo $player['total']; ?></span></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
         </div>
-    <?php endif; ?>
 
-    <br>
-
-    <table>
-        <thead>
-            <tr>
-                <th>Jugador</th>
-                <?php foreach ($categorias_lista as $cat_header): ?>
-                    <th><?php echo ucfirst(str_replace('_', ' ', $cat_header)); ?></th>
-                <?php endforeach; ?>
-                <th>Total</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php foreach ($puntos_por_jugador as $player):
-                $pid = $player['id'];
-                $cats = $detalles_jugador[$pid] ?? [];
-            ?>
-                <tr>
-                    <td><strong><?php echo $player['nombre']; ?></strong></td>
-                    <?php foreach ($categorias_lista as $cat):
-                        $data = $cats[$cat] ?? ['palabra' => '-', 'puntos' => 0];
-                    ?>
-                        <td>
-                            <?php echo $data['palabra']; ?>
-                            <br>
-                            <small style="color: blue;">(<?php echo $data['puntos']; ?>pts)</small>
-                        </td>
-                    <?php endforeach; ?>
-                    <td><strong><?php echo $player['total']; ?></strong></td>
-                </tr>
-            <?php endforeach; ?>
-        </tbody>
-    </table>
-
-    <br><br>
-    <a href="index.php" class="btn">Volver al Inicio</a>
+        <a href="index.php" class="btn">Volver al Inicio</a>
+    </div>
 
 </body>
 

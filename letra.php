@@ -246,50 +246,50 @@ if ($tiempo_restante < 0) $tiempo_restante = 0;
 
             <div class="field-group">
                 <label>Nombre:</label>
-                <input type="text" name="nombre" autocomplete="off" data-validate="true">
-                <span class="error-message">Debe comenzar con la letra <?php echo $letra; ?></span>
+                <input type="text" name="nombre" autocomplete="off" data-validate="true" data-name-only="true">
+                <span class="error-message">Si no comienza con la letra <?php echo $letra; ?>, vale 0 puntos</span>
             </div>
 
             <div class="field-group">
                 <label>Apellido:</label>
-                <input type="text" name="apellido" autocomplete="off" data-validate="true">
-                <span class="error-message">Debe comenzar con la letra <?php echo $letra; ?></span>
+                <input type="text" name="apellido" autocomplete="off" data-validate="true" data-name-only="true">
+                <span class="error-message">Si no comienza con la letra <?php echo $letra; ?>, vale 0 puntos</span>
             </div>
 
             <div class="field-group">
                 <label>Flor o Fruto:</label>
                 <input type="text" name="flor_fruto" autocomplete="off" data-validate="true">
-                <span class="error-message">Debe comenzar con la letra <?php echo $letra; ?></span>
+                <span class="error-message">Si no comienza con la letra <?php echo $letra; ?>, vale 0 puntos</span>
             </div>
 
             <div class="field-group">
                 <label>Animal:</label>
                 <input type="text" name="animal" autocomplete="off" data-validate="true">
-                <span class="error-message">Debe comenzar con la letra <?php echo $letra; ?></span>
+                <span class="error-message">Si no comienza con la letra <?php echo $letra; ?>, vale 0 puntos</span>
             </div>
 
             <div class="field-group">
                 <label>Color:</label>
                 <input type="text" name="color" autocomplete="off" data-validate="true">
-                <span class="error-message">Debe comenzar con la letra <?php echo $letra; ?></span>
+                <span class="error-message">Si no comienza con la letra <?php echo $letra; ?>, vale 0 puntos</span>
             </div>
 
             <div class="field-group">
                 <label>Cosa:</label>
                 <input type="text" name="cosa" autocomplete="off" data-validate="true">
-                <span class="error-message">Debe comenzar con la letra <?php echo $letra; ?></span>
+                <span class="error-message">Si no comienza con la letra <?php echo $letra; ?>, vale 0 puntos</span>
             </div>
 
             <div class="field-group">
                 <label>País:</label>
                 <input type="text" name="pais" autocomplete="off" data-validate="true">
-                <span class="error-message">Debe comenzar con la letra <?php echo $letra; ?></span>
+                <span class="error-message">Si no comienza con la letra <?php echo $letra; ?>, vale 0 puntos</span>
             </div>
 
             <div class="field-group">
                 <label>Verbo:</label>
                 <input type="text" name="verbo" autocomplete="off" data-validate="true">
-                <span class="error-message">Debe comenzar con la letra <?php echo $letra; ?></span>
+                <span class="error-message">Si no comienza con la letra <?php echo $letra; ?>, vale 0 puntos</span>
             </div>
 
             <div class="btn-container">
@@ -312,14 +312,23 @@ if ($tiempo_restante < 0) $tiempo_restante = 0;
         function validarCampo(input) {
             const valor = input.value.trim();
             const errorSpan = input.parentElement.querySelector('.error-message');
+            const soloLetras = input.dataset.nameOnly === 'true';
             
             if (valor === '') {
                 input.classList.remove('valid', 'invalid');
                 errorSpan.classList.remove('visible');
                 return true; // Campo vacío es válido (no se responde)
             }
+
+            if (soloLetras) {
+                const limpio = valor.replace(/[^A-Za-zÁÉÍÓÚÜÑáéíóúüñ\s'-]/g, '').replace(/\s{2,}/g, ' ');
+                if (valor !== limpio) {
+                    input.value = limpio;
+                }
+            }
             
-            const primeraLetra = valor.charAt(0).toUpperCase();
+            const valorActual = input.value.trim();
+            const primeraLetra = valorActual.charAt(0).toUpperCase();
             const esValido = primeraLetra === letraActual;
             
             if (esValido) {
@@ -341,28 +350,11 @@ if ($tiempo_restante < 0) $tiempo_restante = 0;
             input.addEventListener('blur', () => validarCampo(input));
         });
 
-        // Validar formulario antes de enviar
-        form.addEventListener('submit', function(e) {
-            let hayInvalidos = false;
-            let camposInvalidos = [];
-            
+        // Marcar visualmente campos que darán 0 puntos, pero sin bloquear el envío
+        form.addEventListener('submit', function() {
             document.querySelectorAll('input[data-validate="true"]').forEach(input => {
-                const valor = input.value.trim();
-                if (valor !== '') {
-                    const primeraLetra = valor.charAt(0).toUpperCase();
-                    if (primeraLetra !== letraActual) {
-                        hayInvalidos = true;
-                        camposInvalidos.push(input.parentElement.querySelector('label').textContent.replace(':', ''));
-                        input.classList.add('invalid');
-                    }
-                }
+                validarCampo(input);
             });
-            
-            if (hayInvalidos) {
-                e.preventDefault();
-                alert('Las siguientes palabras no comienzan con la letra ' + letraActual + ':\n' + camposInvalidos.join('\n'));
-                return false;
-            }
         });
 
         // Initial display

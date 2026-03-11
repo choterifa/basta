@@ -2,7 +2,13 @@
 session_start();
 include("conectar.php");
 
-$nombre = $_POST['nombre'];
+$nombre = isset($_POST['nombre']) ? trim($_POST['nombre']) : '';
+
+if ($nombre === '' || !preg_match("/^[\\p{L}\\s'-]+$/u", $nombre)) {
+    exit("Nombre invalido. Solo se permiten letras, espacios, guion y apostrofe. <a href='index.php'>Volver</a>");
+}
+
+$nombre = mysqli_real_escape_string($conn, $nombre);
 
 // Crear partida
 $tiempo_inicio = time();

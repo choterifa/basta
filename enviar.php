@@ -25,20 +25,20 @@ foreach ($categorias as $cat) {
     if (isset($_POST[$cat])) {
         // Sanitizar entrada
         $palabra = mysqli_real_escape_string($conn, trim(strtoupper($_POST[$cat])));
+        $esNombreSinNumeros = !in_array($cat, ["nombre", "apellido"], true) || preg_match("/^[\\p{L}\\s'-]+$/u", $_POST[$cat]);
         
         // Validar que la palabra empiece con la letra correcta (si no está vacía)
-        if ($palabra !== '') {
+        $puntos = 0; // Por defecto 0 puntos
+        if ($palabra !== '' && $esNombreSinNumeros) {
             $primeraLetra = substr($palabra, 0, 1);
-            if ($primeraLetra !== $letra) {
-                // Palabra inválida - no se guarda o se guarda con 0 puntos
-                // Aquí decidimos no guardarla
-                continue;
+            if ($primeraLetra === $letra) {
+                $puntos = 10; // Palabras válidas valen 10 puntos
             }
         }
 
         // Insertar respuesta
         $query = "INSERT INTO respuestas (jugador_id, categoria, palabra, puntos) 
-                  VALUES ('$id_jugador', '$cat', '$palabra', 0)";
+                  VALUES ('$id_jugador', '$cat', '$palabra', $puntos)";
         mysqli_query($conn, $query);
     }
 }
