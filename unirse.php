@@ -6,8 +6,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $nombre = isset($_POST['nombre']) ? trim($_POST['nombre']) : '';
     $partida_id = isset($_POST['partida']) ? (int) $_POST['partida'] : 0;
 
-    if ($nombre === '' || !preg_match("/^[\\p{L}\\s'-]+$/u", $nombre)) {
-        exit("Nombre invalido. Solo se permiten letras, espacios, guion y apostrofe. <a href='index.php'>Volver</a>");
+    if ($nombre === '' || strlen($nombre) < 3) {
+        exit("Nombre invalido. <a href='index.php'>Volver</a>");
     }
 
     if ($partida_id <= 0) {
@@ -16,22 +16,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $nombre = mysqli_real_escape_string($conn, $nombre);
 
-    // Verificar si existe la partida
-    $check = mysqli_query($conn, "SELECT id_partida, estado FROM partidas WHERE id_partida = $partida_id");
+    // Verificar si existe la partida y está en espera
+    $check = mysqli_query($conn, "SELECT id_partida, estado FROM partidas WHERE id_partida = $partida_id AND estado = 'esperando'");
     if (mysqli_num_rows($check) > 0) {
-        $row = mysqli_fetch_assoc($check);
-
-        // Crear jugador
-        mysqli_query($conn, "INSERT INTO jugadores (nombre, partida_id) VALUES ('$nombre', $partida_id)");
+        // Crear jugador (no host)
+        mysqli_query($conn, "INSERT INTO jugadores (nombre, partida_id, es_host) VALUES ('$nombre', $partida_id, 0)");
         $id_jugador = mysqli_insert_id($conn);
 
         // Guardar en sesión
         $_SESSION['id_jugador'] = $id_jugador;
         $_SESSION['id_partida'] = $partida_id;
         $_SESSION['nombre'] = $nombre;
+        $_SESSION['es_host'] = 0;
 
-        header("Location: letra.php");
+        header("Location: lobby.php");
     } else {
-        echo "La partida no existe. <a href='index.php'>Volver</a>";
+        echo "La partida no existe o ya comenzó. <a href='index.php'>Volver</a>";
     }
 }
+?>

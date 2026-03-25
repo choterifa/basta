@@ -35,12 +35,26 @@ if ($tiempo_restante < 0) $tiempo_restante = 0;
 <html>
 
 <head>
-    <title>Jugando Basta - Letra <?php echo $letra; ?></title>
+    <title>¡Basta! - Jugando</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary: #58cc02;
+            --primary-dark: #46a302;
+            --secondary: #1cb0f6;
+            --secondary-dark: #1899d6;
+            --bg: #f7f7f7;
+            --text: #3c3c3c;
+            --muted: #afafaf;
+            --border: #e5e5e5;
+            --error: #ff4b4b;
+        }
+
         body {
             font-family: 'Nunito', sans-serif;
-            background-color: #f7f7f7;
+            background-color: var(--bg);
             margin: 0;
             padding: 0;
             display: flex;
@@ -52,269 +66,208 @@ if ($tiempo_restante < 0) $tiempo_restante = 0;
 
         .container {
             background: white;
-            padding: 20px;
-            border-radius: 20px;
-            box-shadow: 0 10px 0 #e5e5e5;
+            padding: 25px;
+            border-radius: 28px;
+            box-shadow: 0 12px 0 var(--border);
             width: 95%;
-            max-width: 800px;
-            max-height: 95vh;
+            max-width: 850px;
+            max-height: 98vh;
             display: flex;
             flex-direction: column;
             box-sizing: border-box;
+            position: relative;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid var(--bg);
         }
 
         h1 {
-            color: #3c3c3c;
-            text-align: center;
-            margin: 0 0 5px 0;
+            color: var(--text);
+            margin: 0;
             font-weight: 900;
-            font-size: 1.5rem;
-        }
-
-        h2 {
-            text-align: center;
-            color: #777;
-            font-size: 1rem;
-            margin: 0 0 10px 0;
-        }
-
-        #letra-display {
-            display: inline-block;
-            background: #1cb0f6;
-            color: white;
-            padding: 2px 15px;
-            border-radius: 12px;
             font-size: 1.8rem;
+            letter-spacing: -1px;
+        }
+
+        .letra-capsule {
+            background: var(--secondary);
+            color: white;
+            padding: 8px 25px;
+            border-radius: 16px;
+            font-size: 2.5rem;
             font-weight: 900;
-            box-shadow: 0 4px 0 #1899d6;
-            transform: rotate(-3deg) translateY(-3px);
-            margin-left: 5px;
+            box-shadow: 0 6px 0 var(--secondary-dark);
+            transform: rotate(-2deg);
         }
 
         .timer {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            background: #ff4b4b;
+            background: var(--error);
             color: white;
-            padding: 8px 15px;
-            border-radius: 30px;
+            padding: 10px 20px;
+            border-radius: 40px;
             font-weight: 900;
-            font-size: 1.2rem;
-            box-shadow: 0 3px 0 #d43b3b;
-            z-index: 100;
-            animation: pulse 1s infinite;
+            font-size: 1.5rem;
+            box-shadow: 0 4px 0 #d43b3b;
+            animation: pulse-border 1.5s infinite;
         }
 
-        .round-status {
-            display: none;
-            margin: 0 auto 14px;
-            padding: 10px 14px;
-            max-width: 460px;
-            border-radius: 14px;
-            background: #fff7d6;
-            color: #8a6a00;
-            font-weight: 800;
-            text-align: center;
+        @keyframes pulse-border {
+            0% { box-shadow: 0 4px 0 #d43b3b, 0 0 0 0px rgba(255, 75, 75, 0.4); }
+            70% { box-shadow: 0 4px 0 #d43b3b, 0 0 0 15px rgba(255, 75, 75, 0); }
+            100% { box-shadow: 0 4px 0 #d43b3b, 0 0 0 0px rgba(255, 75, 75, 0); }
         }
 
-        .round-status.visible {
-            display: block;
-        }
-
-        form {
+        #game-form {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
             overflow-y: auto;
-            padding: 5px;
-            align-content: start;
-        }
-
-        /* Make button span full width */
-        .btn-container {
-            grid-column: 1 / -1;
-            margin-top: 10px;
+            padding: 10px 5px;
+            margin-bottom: 10px;
         }
 
         .field-group {
             display: flex;
             flex-direction: column;
+            gap: 6px;
         }
 
         label {
-            font-weight: 800;p
-            color: #777;
-            margin-bottom: 3px;
+            font-weight: 800;
+            color: var(--muted);
             text-transform: uppercase;
-            font-size: 0.75rem;
+            font-size: 0.8rem;
             letter-spacing: 0.5px;
+            margin-left: 5px;
         }
 
         input {
-            padding: 10px;
-            border: 2px solid #e5e5e5;
-            border-radius: 12px;
-            font-size: 1rem;
-            font-family: 'Nunito', sans-serif;
-            background: #f7f7f7;
+            padding: 15px;
+            border: 2px solid var(--border);
+            border-radius: 16px;
+            font-size: 1.1rem;
+            font-family: inherit;
+            background: var(--bg);
             outline: none;
             transition: all 0.2s;
-            width: 100%;
-            box-sizing: border-box;
-        }
-
-        input.invalid {
-            border-color: #ff4b4b;
-            background: #fff0f0;
-        }
-
-        input.valid {
-            border-color: #58cc02;
-            background: #f0fff0;
-        }
-
-        .error-message {
-            color: #ff4b4b;
-            font-size: 0.75rem;
-            margin-top: 3px;
-            display: none;
-        }
-
-        .error-message.visible {
-            display: block;
+            font-weight: 700;
         }
 
         input:focus {
-            border-color: #1cb0f6;
+            border-color: var(--secondary);
             background: #fff;
             transform: scale(1.01);
         }
 
-        button.btn-basta {
-            background-color: #ff4b4b;
-            color: white;
-            border: none;
-            padding: 15px;
-            font-size: 1.5rem;
-            font-weight: 900;
-            border-radius: 16px;
-            cursor: pointer;
-            box-shadow: 0 5px 0 #d43b3b;
-            text-transform: uppercase;
-            width: 100%;
-            transition: all 0.1s;
+        input.valid {
+            border-color: var(--primary);
+            background: #f0fff0;
         }
 
-        button.btn-basta:active {
-            transform: translateY(5px);
+        input.invalid {
+            border-color: var(--error);
+            background: #fff0f0;
+        }
+
+        .error-hint {
+            color: var(--error);
+            font-size: 0.75rem;
+            font-weight: 800;
+            margin-left: 5px;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .error-hint.visible { opacity: 1; }
+
+        .btn-basta {
+            grid-column: 1 / -1;
+            background-color: var(--error);
+            color: white;
+            border: none;
+            padding: 20px;
+            font-size: 2rem;
+            font-weight: 900;
+            border-radius: 20px;
+            cursor: pointer;
+            box-shadow: 0 8px 0 #d43b3b;
+            text-transform: uppercase;
+            transition: all 0.1s;
+            margin-top: 10px;
+        }
+
+        .btn-basta:active {
+            transform: translateY(8px);
             box-shadow: none;
         }
 
-        /* Mobile adjustment */
-        @media (max-width: 600px) {
-            form {
-                grid-template-columns: 1fr;
-                gap: 10px;
-            }
-
-            h1 {
-                font-size: 1.2rem;
-            }
-
-            #letra-display {
-                font-size: 1.5rem;
-            }
-
-            .timer {
-                font-size: 1rem;
-                padding: 5px 10px;
-            }
+        .round-status {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #fff7d6;
+            color: #8a6a00;
+            padding: 15px 40px;
+            border-radius: 50px;
+            font-weight: 900;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            z-index: 1000;
+            display: none;
         }
 
-        @keyframes pulse {
-            0% {
-                transform: scale(1);
-            }
+        .round-status.visible { display: block; }
 
-            50% {
-                transform: scale(1.05);
-            }
-
-            100% {
-                transform: scale(1);
-            }
+        @media (max-width: 600px) {
+            #game-form { grid-template-columns: 1fr; }
+            h1 { font-size: 1.2rem; }
+            .letra-capsule { font-size: 1.8rem; }
+            .timer { font-size: 1.1rem; padding: 8px 15px; }
         }
     </style>
 </head>
 
 <body>
+    <div id="round-status" class="round-status"></div>
 
     <div class="container">
-        <!-- Relative container for absolute timer -->
-        <div style="position: relative; width: 100%;">
-            <h1>Juego en curso</h1>
-            <h2>Letra: <span id="letra-display"><?php echo $letra; ?></span></h2>
+        <div class="header">
+            <div>
+                <p style="margin:0; font-weight:800; color:var(--muted); font-size:0.8rem; text-transform:uppercase;">Letra actual:</p>
+                <div class="letra-capsule"><?php echo $letra; ?></div>
+            </div>
+            <h1>¡CORRE!</h1>
             <div id="timer-display" class="timer"><?php echo $tiempo_restante; ?></div>
         </div>
-        <div id="round-status" class="round-status"></div>
 
         <form id="game-form" action="enviar.php" method="post">
+            <?php
+            $campos = [
+                'nombre' => 'Nombre',
+                'apellido' => 'Apellido',
+                'flor_fruto' => 'Flor o Fruto',
+                'animal' => 'Animal',
+                'color' => 'Color',
+                'cosa' => 'Cosa',
+                'pais' => 'País',
+                'verbo' => 'Verbo'
+            ];
 
-            <div class="field-group">
-                <label>Nombre:</label>
-                <input type="text" name="nombre" autocomplete="off" data-validate="true" data-name-only="true">
-                <span class="error-message">Si no comienza con la letra <?php echo $letra; ?>, vale 0 puntos</span>
-            </div>
-
-            <div class="field-group">
-                <label>Apellido:</label>
-                <input type="text" name="apellido" autocomplete="off" data-validate="true" data-name-only="true">
-                <span class="error-message">Si no comienza con la letra <?php echo $letra; ?>, vale 0 puntos</span>
-            </div>
-
-            <div class="field-group">
-                <label>Flor o Fruto:</label>
-                <input type="text" name="flor_fruto" autocomplete="off" data-validate="true">
-                <span class="error-message">Si no comienza con la letra <?php echo $letra; ?>, vale 0 puntos</span>
-            </div>
-
-            <div class="field-group">
-                <label>Animal:</label>
-                <input type="text" name="animal" autocomplete="off" data-validate="true">
-                <span class="error-message">Si no comienza con la letra <?php echo $letra; ?>, vale 0 puntos</span>
-            </div>
-
-            <div class="field-group">
-                <label>Color:</label>
-                <input type="text" name="color" autocomplete="off" data-validate="true">
-                <span class="error-message">Si no comienza con la letra <?php echo $letra; ?>, vale 0 puntos</span>
-            </div>
-
-            <div class="field-group">
-                <label>Cosa:</label>
-                <input type="text" name="cosa" autocomplete="off" data-validate="true">
-                <span class="error-message">Si no comienza con la letra <?php echo $letra; ?>, vale 0 puntos</span>
-            </div>
-
-            <div class="field-group">
-                <label>País:</label>
-                <input type="text" name="pais" autocomplete="off" data-validate="true">
-                <span class="error-message">Si no comienza con la letra <?php echo $letra; ?>, vale 0 puntos</span>
-            </div>
-
-            <div class="field-group">
-                <label>Verbo:</label>
-                <input type="text" name="verbo" autocomplete="off" data-validate="true">
-                <span class="error-message">Si no comienza con la letra <?php echo $letra; ?>, vale 0 puntos</span>
-            </div>
-
-            <div class="btn-container">
-                <button type="button" class="btn-basta" onclick="stopGame()">
-                    ¡BASTA!
-                </button>
-            </div>
-
+            foreach ($campos as $name => $label) {
+                echo '<div class="field-group">';
+                echo '  <label>' . $label . '</label>';
+                echo '  <input type="text" name="' . $name . '" autocomplete="off" data-validate="true" placeholder="...">';
+                echo '  <div class="error-hint">¡Debe empezar con ' . $letra . '!</div>';
+                echo '</div>';
+            }
+            ?>
+            <button type="button" class="btn-basta" onclick="confirmStop()">¡BASTA!</button>
         </form>
     </div>
 
@@ -325,11 +278,9 @@ if ($tiempo_restante < 0) $tiempo_restante = 0;
         const form = document.getElementById('game-form');
         const roundStatus = document.getElementById('round-status');
         let gameEnded = false;
-        let submitTimeout = null;
 
-        function mostrarEstadoRonda(message) {
-            if (!message) return;
-            roundStatus.textContent = message;
+        function mostrarStatus(msg) {
+            roundStatus.textContent = msg;
             roundStatus.classList.add('visible');
         }
 
@@ -338,128 +289,76 @@ if ($tiempo_restante < 0) $tiempo_restante = 0;
             gameEnded = true;
             clearInterval(timerInterval);
             clearInterval(pollingInterval);
-            if (submitTimeout) clearTimeout(submitTimeout);
-            mostrarEstadoRonda(message || 'La ronda termino. Enviando respuestas...');
+            mostrarStatus(message || 'Ronda terminada. Enviando...');
 
             const delay = Math.max(0, deadlineMs - Date.now());
-            submitTimeout = setTimeout(() => {
-                form.submit();
-            }, delay);
+            setTimeout(() => form.submit(), delay);
         }
 
         function finalizarRonda(message) {
             if (gameEnded) return;
-
             fetch('finalizar_ronda.php', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
-                },
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body: 'finalizar=1'
             })
-                .then(response => response.json())
-                .then(data => {
-                    if (data && data.deadline_ms) {
-                        programarEnvio(data.deadline_ms, message);
-                        return;
-                    }
-                    throw new Error('No deadline received');
-                })
-                .catch(() => {
-                    gameEnded = true;
-                    clearInterval(timerInterval);
-                    clearInterval(pollingInterval);
-                    mostrarEstadoRonda(message || 'La ronda termino. Enviando respuestas...');
-                    form.submit();
-                });
+            .then(r => r.json())
+            .then(data => programarEnvio(data.deadline_ms, message))
+            .catch(() => {
+                gameEnded = true;
+                mostrarStatus(message);
+                form.submit();
+            });
         }
 
-        // Validación de campos
-        function validarCampo(input) {
-            const valor = input.value.trim();
-            const errorSpan = input.parentElement.querySelector('.error-message');
-            const soloLetras = input.dataset.nameOnly === 'true';
-            
-            if (valor === '') {
-                input.classList.remove('valid', 'invalid');
-                errorSpan.classList.remove('visible');
-                return true; // Campo vacío es válido (no se responde)
+        function confirmStop() {
+            if (gameEnded) return;
+            if (confirm("¿Seguro que quieres detener el juego para todos?")) {
+                finalizarRonda("¡Presionaste BASTA! Enviando...");
             }
-
-            if (soloLetras) {
-                const limpio = valor.replace(/[^A-Za-zÁÉÍÓÚÜÑáéíóúüñ\s'-]/g, '').replace(/\s{2,}/g, ' ');
-                if (valor !== limpio) {
-                    input.value = limpio;
-                }
-            }
-            
-            const valorActual = input.value.trim();
-            const primeraLetra = valorActual.charAt(0).toUpperCase();
-            const esValido = primeraLetra === letraActual;
-            
-            if (esValido) {
-                input.classList.remove('invalid');
-                input.classList.add('valid');
-                errorSpan.classList.remove('visible');
-            } else {
-                input.classList.remove('valid');
-                input.classList.add('invalid');
-                errorSpan.classList.add('visible');
-            }
-            
-            return esValido;
         }
 
-        // Agregar listeners a todos los campos
+        // Validación
         document.querySelectorAll('input[data-validate="true"]').forEach(input => {
-            input.addEventListener('input', () => validarCampo(input));
-            input.addEventListener('blur', () => validarCampo(input));
-        });
+            input.addEventListener('input', function() {
+                const val = this.value.trim().toUpperCase();
+                const hint = this.parentElement.querySelector('.error-hint');
+                
+                if (val === '') {
+                    this.classList.remove('valid', 'invalid');
+                    hint.classList.remove('visible');
+                    return;
+                }
 
-        // Marcar visualmente campos que darán 0 puntos, pero sin bloquear el envío
-        form.addEventListener('submit', function() {
-            document.querySelectorAll('input[data-validate="true"]').forEach(input => {
-                validarCampo(input);
+                if (val.charAt(0) === letraActual) {
+                    this.classList.add('valid');
+                    this.classList.remove('invalid');
+                    hint.classList.remove('visible');
+                } else {
+                    this.classList.add('invalid');
+                    this.classList.remove('valid');
+                    hint.classList.add('visible');
+                }
             });
         });
 
-        // Initial display
-        timerDisplay.textContent = timeLeft;
-
-        // Temporizador
         const timerInterval = setInterval(() => {
             if (gameEnded) return;
             timeLeft--;
-            if (timeLeft >= 0) {
-                timerDisplay.textContent = timeLeft;
-            }
-            if (timeLeft <= 0) {
-                finalizarRonda("Tiempo fuera. Cerrando ronda...");
-            }
+            if (timeLeft >= 0) timerDisplay.textContent = timeLeft;
+            if (timeLeft <= 0) finalizarRonda("¡Tiempo terminado!");
         }, 1000);
 
-        // Función para el botón BASTA
-        function stopGame() {
-            if (gameEnded) return;
-            if (confirm("¿Estás seguro de detener el juego?")) {
-                finalizarRonda("Ronda terminada. Enviando respuestas...");
-            }
-        }
-
-        // Polling para chequear si alguien más presionó BASTA
         const pollingInterval = setInterval(() => {
             if (gameEnded) return;
             fetch('check_status.php')
-                .then(response => response.json())
+                .then(r => r.json())
                 .then(data => {
-                    if (data.estado === 'finalizada' && data.deadline_ms) {
-                        programarEnvio(data.deadline_ms, "Alguien presiono BASTA. Enviando respuestas...");
+                    if (data.estado === 'finalizada') {
+                        programarEnvio(data.deadline_ms, "¡Alguien dijo BASTA!");
                     }
-                })
-                .catch(err => console.error("Error polling status:", err));
-        }, 250); // Chequear rapido para cerrar la ronda en todos casi al mismo tiempo
+                }).catch(() => {});
+        }, 400);
     </script>
-
 </body>
-
 </html>
