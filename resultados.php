@@ -21,6 +21,53 @@ while ($row = mysqli_fetch_assoc($result_jugadores)) {
     ];
 }
 
+// 0. Sincronización: Esperar a que el tiempo de envío compartido haya pasado
+// Y que todos los jugadores registrados hayan enviado respuestas (o se cumpla el tiempo límite)
+include("round_sync.php");
+$deadline_ms = readRoundDeadlineMs($id_partida);
+if ($deadline_ms) {
+    $current_ms = (int) round(microtime(true) * 1000);
+    $wait_buffer = 4000; // 4 segundos de gracia total
+    
+    // Contar cuántos jugadores han enviado algo (aunque sea palabras vacías, al menos un registro en respuestas)
+    $query_count = "SELECT COUNT(DISTINCT jugador_id) as total_enviaron FROM respuestas WHERE jugador_id IN (SELECT id_jugador FROM jugadores WHERE partida_id = $id_partida)";
+    $res_count = mysqli_query($conn, $query_count);
+    $row_count = mysqli_fetch_assoc($res_count);
+    $total_enviaron = (int) $row_count['total_enviaron'];
+    $total_jugadores = count($jugadores);
+
+    if ($total_enviaron < $total_jugadores && $current_ms < ($deadline_ms + $wait_buffer)) {
+        // Aún faltan jugadores y estamos dentro del tiempo de espera
+        ?>
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <meta http-equiv="refresh" content="1"> <!-- Refescar cada segundo para ver si ya terminaron -->
+            <title>Sincronizando...</title>
+            <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+            <style>
+                body { font-family: 'Nunito', sans-serif; background: #f7f7f7; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+                .wait-box { text-align: center; background: white; padding: 40px; border-radius: 30px; box-shadow: 0 10px 0 #e5e5e5; max-width: 400px; width: 90%; }
+                .loader { border: 8px solid #f3f3f3; border-top: 8px solid #1cb0f6; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 0 auto 20px; }
+                @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+                .status-msg { font-size: 1.2rem; color: #3c3c3c; font-weight: 800; margin-bottom: 10px; }
+            </style>
+        </head>
+        <body>
+            <div class="wait-box">
+                <div class="loader"></div>
+                <div class="status-msg">Sincronizando respuestas...</div>
+                <p style="color:#afafaf;"><?php echo $total_enviaron; ?> de <?php echo $total_jugadores; ?> jugadores listos.</p>
+                <p style="font-size: 0.8rem; color:#ccc;">Calculando puntos automáticamente en breve.</p>
+            </div>
+        </body>
+        </html>
+        <?php
+        exit;
+    }
+}
+
 // 1. Obtener todas las respuestas de la partida
 $query = "SELECT r.id_respuesta, r.categoria, r.palabra, r.puntos, r.jugador_id, j.nombre 
           FROM respuestas r 
@@ -28,10 +75,17 @@ $query = "SELECT r.id_respuesta, r.categoria, r.palabra, r.puntos, r.jugador_id,
           WHERE j.partida_id = $id_partida";
 $result = mysqli_query($conn, $query);
 
+if (!$result) {
+    die("Error en la consulta: " . mysqli_error($conn));
+}
+
 $respuestas = [];
 while ($row = mysqli_fetch_assoc($result)) {
     $respuestas[] = $row;
 }
+
+// Debug (optional, remove in production)
+// if (count($respuestas) === 0) { /* Log something? */ }
 
 // 2. Calcular frecuencias por categoría y palabra solo con respuestas validas
 $frecuencias = []; // [categoria][palabra] => count

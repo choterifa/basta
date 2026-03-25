@@ -28,7 +28,7 @@ foreach ($categorias as $cat) {
     if (isset($_POST[$cat])) {
         // Sanitizar entrada: quitar símbolos y dejar solo letras/espacios
         $palabraOriginal = trim($_POST[$cat]);
-        $palabraLimpia = preg_replace("/[^a-zA-Z\s\u00C0-\u017F]/u", '', $palabraOriginal);
+        $palabraLimpia = preg_replace("/[^a-zA-Z\s\x{00C0}-\x{017F}]/u", '', $palabraOriginal);
         $palabra = mysqli_real_escape_string($conn, strtoupper(trim($palabraLimpia)));
         
         $esNombreSinNumeros = !in_array($cat, ["nombre", "apellido"], true) || preg_match("/^[\\p{L}\\s'-]+$/u", $palabraOriginal);
@@ -54,7 +54,7 @@ foreach ($categorias as $cat) {
         // Insertar respuesta
         $query = "INSERT INTO respuestas (jugador_id, categoria, palabra, puntos) 
                   VALUES ('$id_jugador', '$cat', '$palabra', $puntos)";
-        mysqli_query($conn, $query);
+        mysqli_query($conn, $query) or die(mysqli_error($conn));
     }
 }
 

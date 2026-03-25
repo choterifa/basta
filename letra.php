@@ -132,10 +132,11 @@ if ($tiempo_restante < 0) $tiempo_restante = 0;
             margin-bottom: 10px;
         }
 
-        .field-group {
+        .input-group {
             display: flex;
             flex-direction: column;
             gap: 6px;
+            position: relative;
         }
 
         label {
@@ -240,13 +241,12 @@ if ($tiempo_restante < 0) $tiempo_restante = 0;
             color: #ff4b4b;
             margin-top: 5px;
             height: 1.2em;
-            opacity: 0;
-            transition: opacity 0.2s;
+            display: none;
             text-align: left;
         }
 
         .input-group input.invalid + .field-hint {
-            opacity: 1;
+            display: block;
         }
 
         .duplicate {
@@ -295,14 +295,19 @@ if ($tiempo_restante < 0) $tiempo_restante = 0;
                 'verbo' => 'Verbo'
             ];
 
-            foreach ($campos as $name => $label) {
-                echo '<div class="field-group">';
-                echo '  <label>' . $label . '</label>';
-                echo '  <input type="text" name="' . $name . '" autocomplete="off" data-validate="true" placeholder="...">';
-                echo '  <div class="error-hint">¡Debe empezar con ' . $letra . '!</div>';
-                echo '</div>';
-            }
-            ?>
+            foreach ($campos as $cat => $label) : ?>
+                <div class="input-group">
+                    <label for="<?php echo $cat; ?>">
+                        <?php echo htmlspecialchars($label); ?>
+                    </label>
+                    <input type="text" id="<?php echo $cat; ?>" name="<?php echo $cat; ?>" 
+                           placeholder="Escribe aquí..." 
+                           data-validate="true"
+                           autocomplete="off"
+                           maxlength="30">
+                    <div class="field-hint"></div>
+                </div>
+            <?php endforeach; ?>
             <button type="button" class="btn-basta" onclick="confirmStop()">¡BASTA!</button>
         </form>
     </div>
@@ -370,9 +375,9 @@ if ($tiempo_restante < 0) $tiempo_restante = 0;
                 // Si el primer carácter no es el correcto, lo bloqueamos
                 if (val.length > 0 && val.charAt(0) !== letraActual) {
                     this.value = ''; // Clear the input if it starts with the wrong letter
-                    this.closest('.input-group').classList.add('invalid');
-                    this.classList.add('shake');
+                    this.classList.add('invalid', 'shake');
                     setTimeout(() => this.classList.remove('shake'), 400);
+                    updateInputStatus(this);
                     return;
                 }
 

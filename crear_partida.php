@@ -10,8 +10,9 @@ if ($nombre === '' || strlen($nombre) < 3) {
 
 $nombre = mysqli_real_escape_string($conn, $nombre);
 
-// Crear partida en estado 'esperando'
-mysqli_query($conn, "INSERT INTO partidas (estado, letra_actual, tiempo_inicio) VALUES ('esperando', NULL, NULL)");
+// Crear partida en estado 'esperando' con tiempo actual para limpieza posterior
+$ahora = time();
+mysqli_query($conn, "INSERT INTO partidas (estado, letra_actual, tiempo_inicio) VALUES ('esperando', NULL, $ahora)");
 $id_partida = mysqli_insert_id($conn);
 
 // Crear jugador (host)
