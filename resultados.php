@@ -58,19 +58,21 @@ foreach ($jugadores as $id_jugador => $jugador) {
 foreach ($respuestas as $resp) {
     $puntos = 0;
     $cat = $resp['categoria'];
-    $pal = $resp['palabra'];
-    $respuesta_valida = (int) $resp['puntos'] > 0;
+    $pal = strtoupper(trim($resp['palabra']));
+    
+    // Si la palabra estaba marcada con puntos en la DB, es potencialmente válida
+    $respuesta_valida_base = (int) $resp['puntos'] > 0;
 
-    if (!empty($pal) && $respuesta_valida) {
+    if (!empty($pal) && $respuesta_valida_base) {
         $count = $frecuencias[$cat][$pal] ?? 0;
 
         if ($count == 1) $puntos = 100;
         elseif ($count == 2) $puntos = 50;
         elseif ($count == 3) $puntos = 25;
-        else $puntos = 0; // >= 4
+        elseif ($count >= 4) $puntos = 10;
     }
 
-    $id_jugador = $resp['jugador_id'];
+    $id_jugador = (int)$resp['jugador_id'];
     $nombre_jugador = $resp['nombre'];
 
     if (!isset($puntos_por_jugador[$id_jugador])) {
@@ -81,7 +83,7 @@ foreach ($respuestas as $resp) {
     $detalles_jugador[$id_jugador][$cat] = ['palabra' => $pal, 'puntos' => $puntos];
 }
 
-// Ordenar ganadores
+// Ordenar ganadores por total descendente
 usort($puntos_por_jugador, function ($a, $b) {
     return $b['total'] - $a['total'];
 });

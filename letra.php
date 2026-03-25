@@ -233,6 +233,32 @@ if ($tiempo_restante < 0) $tiempo_restante = 0;
         }
         
         .shake { animation: shake 0.3s ease-in-out; }
+        
+        .field-hint {
+            font-size: 0.75rem;
+            font-weight: 800;
+            color: #ff4b4b;
+            margin-top: 5px;
+            height: 1.2em;
+            opacity: 0;
+            transition: opacity 0.2s;
+            text-align: left;
+        }
+
+        .input-group input.invalid + .field-hint {
+            opacity: 1;
+        }
+
+        .duplicate {
+            border-color: #ff9d00 !important;
+            box-shadow: 0 4px 0 #e68a00 !important;
+            background-color: #fff9f0 !important;
+        }
+        
+        .input-group input.duplicate + .field-hint {
+            color: #e68a00;
+            opacity: 1;
+        }
 
         @media (max-width: 600px) {
             #game-form { grid-template-columns: 1fr; }
@@ -328,33 +354,89 @@ if ($tiempo_restante < 0) $tiempo_restante = 0;
             }
         }
 
-        // Validación
-        document.querySelectorAll('input[data-validate="true"]').forEach(input => {
+        // Validación Avanzada
+        const inputs = document.querySelectorAll('input[data-validate="true"]');
+        
+        inputs.forEach(input => {
+            // Bloquear Pegado (Anti-Copy/Paste)
+            input.addEventListener('paste', e => e.preventDefault());
+
             input.addEventListener('input', function() {
+                // Limpiar símbolos y números (Solo letras y espacios)
+                this.value = this.value.replace(/[^a-zA-Z\s\u00C0-\u017F]/g, '');
+                
                 let val = this.value.toUpperCase();
                 
                 // Si el primer carácter no es el correcto, lo bloqueamos
                 if (val.length > 0 && val.charAt(0) !== letraActual) {
-                    this.value = '';
-                    this.classList.add('invalid', 'shake');
+                    this.value = ''; // Clear the input if it starts with the wrong letter
+                    this.closest('.input-group').classList.add('invalid');
+                    this.classList.add('shake');
                     setTimeout(() => this.classList.remove('shake'), 400);
                     return;
                 }
 
-                if (val === '') {
-                    this.classList.remove('valid', 'invalid');
-                    return;
-                }
-
-                if (val.charAt(0) === letraActual) {
-                    this.classList.add('valid');
-                    this.classList.remove('invalid');
-                } else {
-                    this.classList.add('invalid');
-                    this.classList.remove('valid');
-                }
+                checkDuplicates();
+                updateInputStatus(this);
             });
         });
+
+        function checkDuplicates() {
+            let usedWords = {};
+            inputs.forEach(inp => {
+                let word = inp.value.trim().toUpperCase();
+                let hint = inp.parentElement.querySelector('.field-hint');
+                if (word.length >= 2) {
+                    if (!usedWords[word]) usedWords[word] = [];
+                    usedWords[word].push(inp);
+                }
+            });
+
+            // Limpiar estados de duplicado
+            inputs.forEach(inp => {
+                inp.classList.remove('duplicate');
+            });
+
+            // Marcar duplicados
+            for (let word in usedWords) {
+                if (usedWords[word].length > 1) {
+                    usedWords[word].forEach(inp => {
+                        inp.classList.add('duplicate', 'invalid');
+                        inp.parentElement.querySelector('.field-hint').textContent = 'Palabra repetida';
+                    });
+                }
+            }
+        }
+
+        function updateInputStatus(input) {
+            let val = input.value.trim().toUpperCase();
+            let hint = input.parentElement.querySelector('.field-hint');
+            
+            if (val === '') {
+                input.classList.remove('valid', 'invalid', 'duplicate');
+                hint.textContent = '';
+                return;
+            }
+
+            if (input.classList.contains('duplicate')) {
+                hint.textContent = 'Palabra repetida';
+                return;
+            }
+
+            if (val.charAt(0) !== letraActual) {
+                input.classList.add('invalid');
+                input.classList.remove('valid');
+                hint.textContent = `Debe empezar con ${letraActual}`;
+            } else if (val.length < 3) {
+                input.classList.add('invalid');
+                input.classList.remove('valid');
+                hint.textContent = 'Mínimo 3 letras';
+            } else {
+                input.classList.add('valid');
+                input.classList.remove('invalid');
+                hint.textContent = '';
+            }
+        }
 
         const timerInterval = setInterval(() => {
             if (gameEnded) return;

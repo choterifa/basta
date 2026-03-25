@@ -22,25 +22,32 @@ ensureRoundDeadlineMs($conn, $id_partida);
 // Categorias
 $categorias = ["nombre", "apellido", "flor_fruto", "animal", "color", "cosa", "pais", "verbo"];
 
+$respuestas_jugador = [];
+
 foreach ($categorias as $cat) {
     if (isset($_POST[$cat])) {
-        // Sanitizar entrada
+        // Sanitizar entrada: quitar símbolos y dejar solo letras/espacios
         $palabraOriginal = trim($_POST[$cat]);
-        $palabra = mysqli_real_escape_string($conn, strtoupper($palabraOriginal));
+        $palabraLimpia = preg_replace("/[^a-zA-Z\s\u00C0-\u017F]/u", '', $palabraOriginal);
+        $palabra = mysqli_real_escape_string($conn, strtoupper(trim($palabraLimpia)));
         
         $esNombreSinNumeros = !in_array($cat, ["nombre", "apellido"], true) || preg_match("/^[\\p{L}\\s'-]+$/u", $palabraOriginal);
         
-        // Nueva validación: no puede ser solo la letra, o la letra repetida (ej. "DD", "DDD")
-        // También debe tener al menos 2 caracteres
+        // Validación: 
+        // 1. Mínimo 3 caracteres
+        // 2. No puede ser solo la letra repetida
+        // 3. No puede estar repetida en otra categoría por el mismo jugador
         $esSoloLetraRepetida = preg_match("/^$letra+$/i", $palabra);
-        $tieneLongitudMinima = strlen($palabra) >= 2;
+        $tieneLongitudMinima = strlen($palabra) >= 3;
+        $esDuplicada = in_array($palabra, $respuestas_jugador);
         
         // Validar que la palabra empiece con la letra correcta
-        $puntos = 0; // Por defecto 0 puntos
-        if ($palabra !== '' && $esNombreSinNumeros && !$esSoloLetraRepetida && $tieneLongitudMinima) {
+        $puntos = 0; 
+        if ($palabra !== '' && $esNombreSinNumeros && !$esSoloLetraRepetida && $tieneLongitudMinima && !$esDuplicada) {
             $primeraLetra = substr($palabra, 0, 1);
             if ($primeraLetra === $letra) {
-                $puntos = 10; // Palabras válidas valen 10 puntos (luego se recalcula en resultados.php)
+                $puntos = 10; 
+                $respuestas_jugador[] = $palabra; // Guardar para checar duplicados en este mismo envío
             }
         }
 
