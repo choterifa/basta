@@ -223,6 +223,16 @@ if ($tiempo_restante < 0) $tiempo_restante = 0;
         }
 
         .round-status.visible { display: block; }
+        
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
+            100% { transform: translateX(0); }
+        }
+        
+        .shake { animation: shake 0.3s ease-in-out; }
 
         @media (max-width: 600px) {
             #game-form { grid-template-columns: 1fr; }
@@ -321,23 +331,27 @@ if ($tiempo_restante < 0) $tiempo_restante = 0;
         // Validación
         document.querySelectorAll('input[data-validate="true"]').forEach(input => {
             input.addEventListener('input', function() {
-                const val = this.value.trim().toUpperCase();
-                const hint = this.parentElement.querySelector('.error-hint');
+                let val = this.value.toUpperCase();
                 
+                // Si el primer carácter no es el correcto, lo bloqueamos
+                if (val.length > 0 && val.charAt(0) !== letraActual) {
+                    this.value = '';
+                    this.classList.add('invalid', 'shake');
+                    setTimeout(() => this.classList.remove('shake'), 400);
+                    return;
+                }
+
                 if (val === '') {
                     this.classList.remove('valid', 'invalid');
-                    hint.classList.remove('visible');
                     return;
                 }
 
                 if (val.charAt(0) === letraActual) {
                     this.classList.add('valid');
                     this.classList.remove('invalid');
-                    hint.classList.remove('visible');
                 } else {
                     this.classList.add('invalid');
                     this.classList.remove('valid');
-                    hint.classList.add('visible');
                 }
             });
         });

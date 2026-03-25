@@ -87,56 +87,57 @@ usort($puntos_por_jugador, function ($a, $b) {
 });
 
 ?>
-
 <!DOCTYPE html>
 <html>
 
 <head>
     <title>Resultados Basta</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary: #58cc02;
+            --primary-dark: #46a302;
+            --secondary: #1cb0f6;
+            --secondary-dark: #1899d6;
+            --bg: #f7f7f7;
+            --text: #3c3c3c;
+            --muted: #afafaf;
+            --border: #e5e5e5;
+            --gold: #ffc800;
+            --gold-dark: #e6b400;
+        }
+
         body {
             font-family: 'Nunito', sans-serif;
-            background-color: #f7f7f7;
+            background-color: var(--bg);
             margin: 0;
             padding: 24px;
-            color: #3c3c3c;
+            color: var(--text);
         }
 
         .page {
-            max-width: 1200px;
+            max-width: 1300px;
             margin: 0 auto;
             text-align: center;
         }
 
         h1 {
-            color: #ffc800;
+            color: var(--gold);
             text-transform: uppercase;
             font-weight: 900;
             font-size: clamp(2rem, 4vw, 3rem);
-            text-shadow: 2px 2px 0 #e6b400;
+            text-shadow: 2px 2px 0 var(--gold-dark);
             margin: 0 0 18px;
-        }
-
-        .winner {
-            background: #ffc800;
-            color: white;
-            padding: 18px 24px;
-            border-radius: 20px;
-            font-size: clamp(1.2rem, 2.2vw, 1.8rem);
-            font-weight: 900;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            margin-bottom: 28px;
-            box-shadow: 0 4px 0 #e6b400;
         }
 
         .table-shell {
             background: white;
-            border-radius: 22px;
+            border-radius: 28px;
+            box-shadow: 0 12px 0 var(--border);
             overflow: hidden;
+            margin-top: 20px;
         }
 
         .table-wrap {
@@ -147,35 +148,25 @@ usort($puntos_por_jugador, function ($a, $b) {
             border-collapse: separate;
             border-spacing: 0;
             width: 100%;
-            min-width: 980px;
+            min-width: 1000px;
             background: white;
-
         }
 
         th {
-            background-color: #1cb0f6;
+            background-color: var(--secondary);
             color: white;
-            padding: 16px 14px;
-            font-weight: 800;
+            padding: 20px 15px;
+            font-weight: 900;
             text-transform: uppercase;
-            font-size: 0.78rem;
-            letter-spacing: 0.08em;
+            font-size: 0.85rem;
+            letter-spacing: 1px;
         }
 
         td {
-            padding: 16px 14px;
-            border-bottom: 1px solid #edf1f5;
-            color: #3c3c3c;
+            padding: 18px 15px;
+            border-bottom: 2px solid var(--bg);
+            color: var(--text);
             font-weight: 700;
-            vertical-align: top;
-        }
-
-        tr:last-child td {
-            border-bottom: none;
-        }
-
-        tbody tr:nth-child(even) td {
-            background: #fbfcfe;
         }
 
         tbody tr:hover td {
@@ -183,90 +174,178 @@ usort($puntos_por_jugador, function ($a, $b) {
         }
 
         .player-name {
-            font-size: 1.25rem;
+            font-size: 1.1rem;
             font-weight: 900;
-            white-space: nowrap;
         }
 
         .cell-word {
             display: block;
-            min-height: 1.4em;
-            font-size: 0.98rem;
+            font-size: 1rem;
             word-break: break-word;
         }
 
         .cell-word.empty {
-            color: #b7bec8;
+            color: var(--muted);
+            font-style: italic;
         }
 
         .cell-points {
             display: inline-block;
             margin-top: 8px;
-            padding: 4px 10px;
-            border-radius: 999px;
-            font-size: 0.82rem;
-            font-weight: 800;
+            padding: 4px 12px;
+            border-radius: 99px;
+            font-size: 0.8rem;
+            font-weight: 900;
             background: #edf7ff;
-            color: #1c7eb8;
+            color: var(--secondary-dark);
         }
 
         .cell-points.zero {
             background: #f1f3f5;
-            color: #7a848f;
+            color: var(--muted);
         }
 
         .total-score {
             font-size: 1.5rem;
             font-weight: 900;
-            white-space: nowrap;
+            color: var(--primary);
         }
 
-        .btn {
-            display: inline-block;
-            margin-top: 32px;
-            background-color: #58cc02;
+        /* Modal / Popover Winner */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            backdrop-filter: blur(5px);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .winner-card {
+            background: white;
+            padding: 50px 40px;
+            border-radius: 35px;
+            box-shadow: 0 15px 0 var(--gold-dark);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            transform: scale(0.8);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+        }
+
+        .modal-overlay.show .winner-card {
+            transform: scale(1);
+        }
+
+        .winner-crown {
+            font-size: 5rem;
+            display: block;
+            margin-bottom: 15px;
+            animation: bounce 1s infinite alternate;
+        }
+
+        .winner-title {
+            color: var(--gold);
+            font-weight: 900;
+            font-size: 2.5rem;
+            margin: 0;
+            text-shadow: 2px 2px 0 var(--gold-dark);
+        }
+
+        .winner-name {
+            font-size: 2rem;
+            font-weight: 900;
+            margin: 15px 0;
+            color: var(--text);
+        }
+
+        .winner-score {
+            background: var(--primary);
             color: white;
+            padding: 10px 25px;
+            border-radius: 20px;
+            font-size: 1.5rem;
+            font-weight: 900;
+            display: inline-block;
+            box-shadow: 0 5px 0 var(--primary-dark);
+            margin-bottom: 30px;
+        }
+
+        .close-btn {
+            background: var(--secondary);
+            color: white;
+            border: none;
             padding: 15px 40px;
             font-size: 1.2rem;
-            font-weight: 800;
-            border-radius: 15px;
-            text-decoration: none;
-            box-shadow: 0 3px 0 #46a302;
-            transition: transform 0.1s;
+            font-weight: 900;
+            border-radius: 16px;
+            cursor: pointer;
+            box-shadow: 0 5px 0 var(--secondary-dark);
+            width: 100%;
+            text-transform: uppercase;
         }
 
-        .btn:hover {
-            transform: scale(1.05);
-        }
-
-        .btn:active {
+        .close-btn:active {
             transform: translateY(5px);
             box-shadow: none;
         }
 
-        @media (max-width: 768px) {
-            body {
-                padding: 16px;
-            }
+        .btn-home {
+            display: inline-block;
+            margin-top: 30px;
+            background: var(--primary);
+            color: white;
+            padding: 15px 50px;
+            font-size: 1.2rem;
+            font-weight: 900;
+            border-radius: 18px;
+            text-decoration: none;
+            box-shadow: 0 6px 0 var(--primary-dark);
+        }
 
-            .winner {
-                width: calc(100% - 8px);
-                box-sizing: border-box;
-            }
+        @keyframes bounce {
+            from { transform: translateY(0); }
+            to { transform: translateY(-20px); }
+        }
+
+        @media (max-width: 768px) {
+            body { padding: 15px; }
         }
     </style>
 </head>
 
 <body>
-    <div class="page">
-        <h1>Resultados de la Ronda</h1>
+    <!-- Winner Modal -->
+    <?php if (count($puntos_por_jugador) > 0): 
+        $ganador = $puntos_por_jugador[0];
+    ?>
+    <div class="modal-overlay show" id="winnerModal">
+        <div class="winner-card">
+            <span class="winner-crown">👑</span>
+            <h2 class="winner-title">¡GANADOR!</h2>
+            <div class="winner-name"><?php echo htmlspecialchars($ganador['nombre']); ?></div>
+            <div class="winner-score"><?php echo $ganador['total']; ?> Puntos</div>
+            <button class="close-btn" onclick="document.getElementById('winnerModal').classList.remove('show')">¡Genial!</button>
+        </div>
+    </div>
+    <?php endif; ?>
 
-        <?php if (count($puntos_por_jugador) > 0): ?>
-            <div class="winner">
-                <span>👑</span>
-                <span>Ganador: <?php echo htmlspecialchars($puntos_por_jugador[0]['nombre']); ?> (<?php echo $puntos_por_jugador[0]['total']; ?> pts)</span>
-            </div>
-        <?php endif; ?>
+    <div class="page">
+        <h1>Resultados finales</h1>
 
         <div class="table-shell">
             <div class="table-wrap">
@@ -281,8 +360,9 @@ usort($puntos_por_jugador, function ($a, $b) {
                         </tr>
                     </thead>
                     <tbody>
-                        <?php foreach ($puntos_por_jugador as $player):
-                            $pid = $player['id'];
+                        <?php 
+                        foreach ($puntos_por_jugador as $player):
+                            $pid = (int)$player['id'];
                             $cats = $detalles_jugador[$pid] ?? [];
                         ?>
                             <tr>
@@ -290,12 +370,13 @@ usort($puntos_por_jugador, function ($a, $b) {
                                 <?php foreach ($categorias_lista as $cat):
                                     $data = $cats[$cat] ?? ['palabra' => '', 'puntos' => 0];
                                     $palabra = trim($data['palabra']);
+                                    $display_text = $palabra === '' ? 'Sin respuesta' : htmlspecialchars($palabra);
                                     $palabra_clase = $palabra === '' ? 'cell-word empty' : 'cell-word';
                                     $puntos_clase = (int) $data['puntos'] === 0 ? 'cell-points zero' : 'cell-points';
                                 ?>
                                     <td>
                                         <span class="<?php echo $palabra_clase; ?>">
-                                            <?php echo $palabra === '' ? 'Sin respuesta' : htmlspecialchars($palabra); ?>
+                                            <?php echo $display_text; ?>
                                         </span>
                                         <span class="<?php echo $puntos_clase; ?>"><?php echo (int) $data['puntos']; ?> pts</span>
                                     </td>
@@ -308,9 +389,16 @@ usort($puntos_por_jugador, function ($a, $b) {
             </div>
         </div>
 
-        <a href="index.php" class="btn">Volver al Inicio</a>
+        <a href="index.php" class="btn-home">Volver al Inicio</a>
     </div>
 
+    <script>
+        // Auto-close modal after 10 seconds if user doesn't click
+        setTimeout(() => {
+            const modal = document.getElementById('winnerModal');
+            if (modal) modal.classList.remove('show');
+        }, 10000);
+    </script>
 </body>
 
 </html>
