@@ -7,9 +7,11 @@ if (!isset($_SESSION['id_partida'])) {
     exit;
 }
 
-$id_partida = $_SESSION['id_partida'];
-$nombre_jugador = $_SESSION['nombre'];
-$es_host = $_SESSION['es_host'];
+$id_partida = $_SESSION['id_partida'] ?? 0;
+$nombre_jugador = $_SESSION['nombre'] ?? 'Jugador';
+$es_host = $_SESSION['es_host'] ?? 0;
+$id_jugador = $_SESSION['id_jugador'] ?? 0;
+
 ?>
 <!DOCTYPE html>
 <html>
@@ -206,7 +208,7 @@ $es_host = $_SESSION['es_host'];
                         <div class="player-avatar" style="background:${COLORS[i % COLORS.length]}">
                             ${p.nombre.charAt(0).toUpperCase()}
                         </div>
-                        <span>${p.nombre} ${p.id_jugador == <?php echo $_SESSION['id_jugador']; ?> ? '(Tú)' : ''}</span>
+                        <span>${p.nombre} ${p.id_jugador == <?php echo $id_jugador; ?> ? '(Tú)' : ''}</span>
                         ${p.es_host == 1 ? '<span class="badge-host">Host</span>' : ''}
                     </div>
                 `).join('');

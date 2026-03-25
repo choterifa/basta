@@ -7,8 +7,9 @@ if (!isset($_SESSION['id_partida'])) {
     exit;
 }
 
-$id_partida = $_SESSION['id_partida'];
-$id_jugador = $_SESSION['id_jugador'];
+$id_partida = $_SESSION['id_partida'] ?? 0;
+$id_jugador = $_SESSION['id_jugador'] ?? 0;
+
 
 // Obtener estado actual
 $query = mysqli_query($conn, "SELECT letra_actual, estado, tiempo_inicio FROM partidas WHERE id_partida = $id_partida");

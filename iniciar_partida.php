@@ -2,12 +2,13 @@
 session_start();
 include("conectar.php");
 
-if (!isset($_SESSION['id_partida']) || !$_SESSION['es_host']) {
+if (!isset($_SESSION['id_partida']) || !isset($_SESSION['es_host']) || !$_SESSION['es_host']) {
     echo json_encode(['success' => false, 'error' => 'No autorizado']);
     exit;
 }
 
-$id_partida = $_SESSION['id_partida'];
+$id_partida = $_SESSION['id_partida'] ?? 0;
+
 
 // Elegir una letra al azar
 $letras = range('A', 'Z');
